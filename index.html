@@ -1,669 +1,524 @@
-from pathlib import Path
-import re
-
-src = Path("/mnt/data/Văn bản đã dán (1)(1).txt")
-html = src.read_text(encoding="utf-8")
-
-# Refresh the page's voice and key labels while preserving its existing bot details and links.
-replacements = {
-    "TINTAN SHARK | Discord Bot": "TINTAN SHARK — Oceanic Comma<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titan Shark V2 — Powerful. In every way.</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter -->
+    <title>Titan Shark V2 — Oceanic System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        appleDark: '#08090a',
-                        appleCard: 'rgba(255, 255, 255, 0.05)',
-                        appleAccent: '#00f0ff',
-                    }
-                }
-            }
-        }
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Smooth Fade Transitions */
-        .slide-content {
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
+        :root {
+            --bg-dark: #050b14;
+            --card-bg: rgba(10, 22, 40, 0.75);
+            --card-border: rgba(0, 240, 255, 0.2);
+            --neon-cyan: #00f0ff;
+            --neon-blue: #0070ff;
+            --neon-green: #3ddc84;
+            --text-main: #f0f7ff;
+            --text-muted: #8aa4c8;
+            --bg-overlay: linear-gradient(180deg, rgba(5, 11, 20, 0.85) 0%, rgba(5, 11, 20, 0.95) 100%);
+            --default-bg: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: var(--bg-overlay), var(--default-bg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* Navbar */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            border: 2px solid #fff;
+        }
+
+        .brand-text h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-text span {
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            color: #030810;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.7);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            z-index: 1;
+            padding: 160px 6% 60px;
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 4.5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero-content h1 .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, var(--neon-cyan) 50%, var(--neon-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .credits-banner {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 6px 18px;
+            border-radius: 8px;
+            background: rgba(61, 220, 132, 0.1);
+            border: 1px solid rgba(61, 220, 132, 0.3);
+            color: var(--neon-green);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Apple-style Animated Slider Box */
+        .showcase-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 36px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(0, 240, 255, 0.1);
+            min-height: 320px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-item {
+            display: none;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .slide-item.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .slide-item h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .slide-item p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .slide-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .slider-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--neon-cyan);
+            width: 25px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        /* Background Customizer Drawer */
+        .bg-drawer {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1100;
+            background: rgba(10, 22, 40, 0.95);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            width: 320px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .bg-drawer h4 {
+            font-size: 0.95rem;
+            color: var(--neon-cyan);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bg-drawer input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: rgba(5, 11, 20, 0.9);
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .bg-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .bg-btn-grid button {
+            padding: 8px 12px;
+            font-size: 0.8rem;
             justify-content: center;
         }
 
-        .slide-content.active {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--card-border);
+            background: rgba(5, 11, 20, 0.98);
+            padding: 30px 6%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
             position: relative;
+            z-index: 1;
+            margin-top: 60px;
         }
 
-        /* Glassmorphism styling */
-        .glass-panel {
-            background: rgba(15, 20, 28, 0.65);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        footer b {
+            color: var(--neon-cyan);
         }
 
-        .glass-card {
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #08090a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1f293d;
-            border-radius: 3px;
-        }
-
-        /* Background Overlay Gradient */
-        .bg-overlay {
-            background: radial-gradient(circle at 70% 30%, rgba(0, 240, 255, 0.08) 0%, rgba(8, 9, 10, 0.85) 60%, rgba(8, 9, 10, 0.98) 100%);
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; padding-top: 130px; text-align: center; }
+            .hero-btns { justify-content: center; }
+            .slide-tags { justify-content: center; }
+            .slider-dots { justify-content: center; }
+            .bg-drawer { left: 16px; right: 16px; width: auto; bottom: 16px; }
         }
     </style>
 </head>
-<body class="bg-appleDark text-white font-sans overflow-x-hidden min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+<body>
 
-    <!-- Background Image Container -->
-    <div id="bgContainer" class="fixed inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 -z-20 scale-105" 
-         style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80');">
-    </div>
-
-    <!-- Dark Overlay gradient to mirror Apple design lighting -->
-    <div class="fixed inset-0 bg-overlay -z-10"></div>
-
-    <!-- HEADER / NAVIGATION -->
-    <header class="w-full px-6 md:px-16 py-6 flex items-center justify-between z-30">
-        <!-- Logo -->
-        <a href="#" class="flex items-center gap-3 group">
-            <div class="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center font-black text-lg transition-transform group-hover:scale-105">
-                <i class="fa-solid font-bold text-black text-sm"><span class="font-extrabold">🦈</span></i>
+    <!-- Header -->
+    <header>
+        <a href="#" class="brand">
+            <div class="brand-logo">🦈</div>
+            <div class="brand-text">
+                <h1>TITAN SHARK</h1>
+                <span>VERSION 2.0</span>
             </div>
-            <span class="font-bold tracking-tight text-white text-base md:text-lg">Titan Shark <span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-cyan-400 font-semibold border border-cyan-500/20">V2</span></span>
         </a>
-
-        <!-- Nav Links -->
-        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <button onclick="goToSlide(0)" class="hover:text-white transition-colors">Overview</button>
-            <button onclick="goToSlide(1)" class="hover:text-white transition-colors">Titan AI</button>
-            <button onclick="goToSlide(2)" class="hover:text-white transition-colors">Titan Sea</button>
-            <button onclick="goToSlide(3)" class="hover:text-white transition-colors">Battle Cats</button>
-            <button onclick="goToSlide(4)" class="hover:text-white transition-colors">Minecraft & Garden</button>
-            <button onclick="goToSlide(5)" class="hover:text-white transition-colors">Auto Mod</button>
-        </nav>
-
-        <!-- Search & Control Actions -->
-        <div class="flex items-center gap-4">
-            <button onclick="toggleBgModal()" title="Change Background Image" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-300 hover:text-cyan-400 hover:border-cyan-500/40 transition-all">
-                <i class="fa-solid fa-image text-sm"></i>
-            </button>
-            <a href="https://trongduynguyen193-bot.github.io/TitanShark/" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm font-semibold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10">
-                <span>Invite Bot</span>
-                <i class="fa-solid fa-arrow-right text-xs"></i>
-            </a>
+        <div class="nav-actions">
+            <a href="https://discord.gg/jPF52GE9VY" target="_blank" class="btn btn-outline">💬 Support</a>
+            <a href="https://discord.com/oauth2/authorize?client_id=1542455884251140096&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" class="btn btn-primary">⚡ Mời Bot</a>
         </div>
     </header>
 
-    <!-- MAIN HERO & CAROUSEL SECTION -->
-    <main class="relative w-full max-w-7xl mx-auto px-6 md:px-16 flex-1 flex items-center my-auto py-12">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-center">
-            
-            <!-- LEFT SLIDE INDICATORS (DOTS + INDEX) -->
-            <div class="hidden lg:flex lg:col-span-1 flex-col items-center gap-4 z-20">
-                <div class="text-xs font-mono text-gray-400 tracking-wider" id="slideIndexText">01 / 06</div>
-                <div class="flex flex-col gap-3 my-2" id="dotsContainer">
-                    <!-- Dots dynamically activated via JS -->
-                </div>
+    <!-- Hero Section with Apple-style Slider -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="badge" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 20px; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.3); color: var(--neon-cyan); font-size: 0.8rem; font-weight: 700; margin-bottom: 20px;">🦈 DISCORD BOT V2</div>
+            <h1>Đại Dương Tính Năng<br><span class="gradient-text">Cho Cộng Đồng Của Bạn</span></h1>
+            <div class="credits-banner">Made with ❤️ by tomnz x Cá Xấu MC</div>
+            <p>Hệ sinh thái Discord bot toàn diện: Trò chuyện & Viết Code AI, Câu cá v2, Minigame Battle Cats, Săn thú Minecraft, Nông trại Pixel và Quản trị tự động.</p>
+            <div class="hero-btns" style="display: flex; gap: 14px; flex-wrap: wrap;">
+                <a href="https://trongduynguyen193-bot.github.io/TitanShark/" target="_blank" class="btn btn-primary">Thêm Bot Ngay ↗</a>
+                <a href="https://discord.gg/jPF52GE9VY" target="_blank" class="btn btn-outline">Tham Gia Server</a>
             </div>
-
-            <!-- MAIN CONTENT SLIDER (Text + Features) -->
-            <div class="lg:col-span-7 relative min-h-[380px] md:min-h-[340px] flex flex-col justify-center">
-                
-                <!-- SLIDE 1: OVERVIEW -->
-                <div class="slide-content active" data-index="0">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold mb-4 w-fit">
-                        <i class="fa-solid fa-sparkles"></i> Titan Shark V2 Release
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-                        Brilliant.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-cyan-400">In every way.</span>
-                    </h1>
-                    <p class="text-gray-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-                        Hệ sinh thái Discord Bot đa năng hiện đại nhất. Tích hợp AI thông minh, Mini-game câu cá v2, Battle Cats, Săn thú Minecraft & Quản trị tự động.
-                    </p>
-                    <div class="flex items-center gap-4 flex-wrap">
-                        <a href="https://discord.com/oauth2/authorize?client_id=1542455884251140096&permissions=8&integration_type=0&scope=bot+applications.commands/" target="_blank" class="px-7 py-3 rounded-full bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5">
-                            Mời Bot Ngay
-                        </a>
-                        <a href="https://discord.gg/jPF52GE9VY" target="_blank" class="px-7 py-3 rounded-full glass-panel text-white font-semibold text-sm hover:bg-white/10 transition-all">
-                            Support Server
-                        </a>
-                    </div>
-                </div>
-
-                <!-- SLIDE 2: TITAN AI -->
-                <div class="slide-content" data-index="1">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-semibold mb-4 w-fit">
-                        <i class="fa-solid fa-brain"></i> Gemini & OpenAI Powered
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-                        Titan AI.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">Smart & Instant.</span>
-                    </h1>
-                    <p class="text-gray-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-                        Trò chuyện linh hoạt với prompt tiếng Việt thân thiện (<code class="text-purple-300 font-mono">!tsai</code>) và chế độ viết code tự động đa ngôn ngữ chuyên nghiệp (<code class="text-purple-300 font-mono">!vietcode</code>).
-                    </p>
-                    <div class="flex items-center gap-3">
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-cyan-300">!tsai [câu hỏi]</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-purple-300">!vietcode [yêu cầu]</span>
-                    </div>
-                </div>
-
-                <!-- SLIDE 3: TITAN SEA FISHING -->
-                <div class="slide-content" data-index="2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold mb-4 w-fit">
-                        <i class="fa-solid fa-fish-fins"></i> Titan Sea v2 System
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-                        Ocean Fishing.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">100+ Sea Species.</span>
-                    </h1>
-                    <p class="text-gray-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-                        Thế giới đại dương phong phú với 8 dạng thời tiết biển ngẫu nhiên, nâng cấp các cấp độ cần câu, sự kiện săn cá hiếm/secret & đổi thưởng lấy xu.
-                    </p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-blue-300">!cauca</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-teal-300">!cahiem</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-cyan-300">!doithuong</span>
-                    </div>
-                </div>
-
-                <!-- SLIDE 4: BATTLE CATS -->
-                <div class="slide-content" data-index="3">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-4 w-fit">
-                        <i class="fa-solid fa-cat"></i> Realtime Combat Minigame
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-                        Battle Cats.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500">Gacha & Strategy.</span>
-                    </h1>
-                    <p class="text-gray-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-                        Gacha chiêu mộ quân đoàn Mèo độc đáo, sắp xếp đội hình 4 vị trí chiến thuật và tham gia chiến đấu vượt 10 ải quái vật gay kịch.
-                    </p>
-                    <div class="flex items-center gap-3">
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-amber-300">!bc gacha</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-orange-300">!bc team</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-yellow-300">!bc battle</span>
-                    </div>
-                </div>
-
-                <!-- SLIDE 5: MINECRAFT & GARDEN -->
-                <div class="slide-content" data-index="4">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold mb-4 w-fit">
-                        <i class="fa-solid fa-seedling"></i> Hunt & Pixel Garden
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-                        Hunt & Grow.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-300">Minecraft Arena.</span>
-                    </h1>
-                    <p class="text-gray-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-                        Săn thú với trang bị kiếm Netherite, đúc Vòng Phù Phép kết hợp trồng trọt nông trại Pixel theo thời gian thực và Thương nhân dạo ghé thăm.
-                    </p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-emerald-300">!santhu</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-green-300">!vuon</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-lime-300">!thuongnhan</span>
-                    </div>
-                </div>
-
-                <!-- SLIDE 6: AUTO MODERATION -->
-                <div class="slide-content" data-index="5">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold mb-4 w-fit">
-                        <i class="fa-solid fa-shield-halved"></i> Auto Moderation & Guard
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-                        Server Guard.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-500">Auto Protection.</span>
-                    </h1>
-                    <p class="text-gray-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-                        Tự động vẽ Welcome Card dán avatar, bộ lọc từ cấm Bad Word thông minh, Anti-spam ảnh/link, hệ thống Nhà tù & Admin Dashboard.
-                    </p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-red-300">!badword</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-pink-300">!setupwelcome</span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-rose-300">!jail</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- RIGHT PREVIEW WIDGET (VIDEO PREVIEW STYLE LIKE REFERENCE) -->
-            <div class="lg:col-span-4 flex justify-center lg:justify-end z-20">
-                <div class="glass-card p-4 rounded-2xl w-full max-w-xs transition-all duration-500 hover:border-cyan-500/40 group relative overflow-hidden shadow-2xl">
-                    <!-- Widget Preview Image / Banner -->
-                    <div class="relative w-full h-44 rounded-xl overflow-hidden mb-3 bg-gray-900">
-                        <img id="previewWidgetImg" 
-                             src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80" 
-                             alt="Feature Preview" 
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors"></div>
-                        
-                        <!-- Play Button Overlay -->
-                        <button onclick="nextSlide()" class="absolute inset-0 m-auto w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white text-base transition-transform group-hover:scale-110 active:scale-95 shadow-lg">
-                            <i class="fa-solid fa-play ml-0.5"></i>
-                        </button>
-
-                        <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[10px] font-mono text-cyan-300">
-                            LIVE PREVIEW
-                        </div>
-                    </div>
-
-                    <!-- Widget Info -->
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h4 id="previewWidgetTitle" class="font-bold text-sm text-white">Titan Sea Fishing v2</h4>
-                            <p id="previewWidgetSub" class="text-xs text-gray-400">Auto Next in 4s...</p>
-                        </div>
-                        <button onclick="nextSlide()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs transition-colors">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- FOOTER & BRAND CREDITS -->
-    <footer class="w-full px-6 md:px-16 py-6 flex flex-col md:flex-row items-center justify-between border-t border-white/5 text-xs text-gray-500 gap-4 z-30">
-        <!-- Social Links (Matching reference bottom left) -->
-        <div class="flex items-center gap-6 font-semibold tracking-wider uppercase text-[11px]">
-            <a href="https://discord.gg/jPF52GE9VY" target="_blank" class="hover:text-cyan-400 transition-colors">DISCORD</a>
-            <a href="#" class="hover:text-cyan-400 transition-colors">FACEBOOK</a>
-            <a href="https://github.com" target="_blank" class="hover:text-cyan-400 transition-colors">GITHUB</a>
         </div>
 
-        <!-- Made By Branding -->
-        <div class="text-center md:text-right">
-            <span class="text-gray-400 font-medium">Titan Shark V2</span> — Made by <span class="text-cyan-400 font-bold">tomnz x Cá Xấu MC</span>
-        </div>
-    </footer>
-
-    <!-- BACKGROUND CUSTOMIZER MODAL -->
-    <div id="bgModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 p-4">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-md border border-cyan-500/30 shadow-2xl relative">
-            <button onclick="toggleBgModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-image text-cyan-400"></i> Custom Background
-            </h3>
-            <p class="text-xs text-gray-400 mb-5">Thay đổi ảnh nền cho trang web Titan Shark V2</p>
-
-            <!-- Option 1: URL Input -->
-            <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-300 mb-2">Nhập Link Ảnh (URL)</label>
-                <div class="flex gap-2">
-                    <input type="text" id="bgUrlInput" placeholder="https://example.com/image.jpg" class="flex-1 px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-xs text-white outline-none focus:border-cyan-400 transition-colors">
-                    <button onclick="applyBgUrl()" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-all">Áp dụng</button>
+        <!-- Apple-style Feature Slider Showcase -->
+        <div class="showcase-container" id="sliderBox">
+            <div class="slide-item active">
+                <div class="slide-icon">🤖</div>
+                <h3>Titan AI Assistant</h3>
+                <p>Hỗ trợ trò chuyện thông minh và chế độ viết code tự động đa ngôn ngữ trực tiếp trong Discord.</p>
+                <div class="slide-tags">
+                    <span class="tag">!tsai</span>
+                    <span class="tag">!vietcode</span>
+                    <span class="tag">Gemini / OpenAI</span>
                 </div>
             </div>
 
-            <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-white/10"></div>
-                <span class="flex-shrink mx-3 text-gray-500 text-[10px] font-mono">HOẶC</span>
-                <div class="flex-grow border-t border-white/10"></div>
+            <div class="slide-item">
+                <div class="slide-icon">🎣</div>
+                <h3>Thế Giới Câu Cá v2</h3>
+                <p>Hơn 100 loài sinh vật biển, 8 loại sự kiện thời tiết đại dương và hệ thống đổi thưởng hấp dẫn.</p>
+                <div class="slide-tags">
+                    <span class="tag">!cauca</span>
+                    <span class="tag">!cahiem</span>
+                    <span class="tag">!doithuong</span>
+                </div>
             </div>
 
-            <!-- Option 2: Upload File -->
-            <div class="mt-2 mb-5">
-                <label class="block text-xs font-semibold text-gray-300 mb-2">Tải ảnh từ máy tính/điện thoại</label>
-                <input type="file" id="bgFileInput" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
-                <button onclick="document.getElementById('bgFileInput').click()" class="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-cyan-400/50 bg-white/5 hover:bg-white/10 text-xs text-gray-300 font-semibold transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up text-cyan-400"></i> Chọn File Ảnh
-                </button>
+            <div class="slide-item">
+                <div class="slide-icon">🐱</div>
+                <h3>Battle Cats Minigame</h3>
+                <p>Gacha chiêu mộ đội quân mèo, xếp đội hình 4 tướng và vượt 10 ải chiến đấu realtime kịch tính.</p>
+                <div class="slide-tags">
+                    <span class="tag">!bc</span>
+                    <span class="tag">Gacha Mèo</span>
+                    <span class="tag">10 Stages</span>
+                </div>
             </div>
 
-            <!-- Reset Button -->
-            <button onclick="resetDefaultBg()" class="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-gray-400 hover:text-white transition-all">
-                Khôi phục ảnh nền mặc định
-            </button>
+            <div class="slide-item">
+                <div class="slide-icon">⚔️</div>
+                <h3>Săn Thú Minecraft</h3>
+                <p>Trang bị kiếm từ Gỗ đến Netherite, kích hoạt vòng phù phép và đi săn quái vật tích lũy xu.</p>
+                <div class="slide-tags">
+                    <span class="tag">!santhu</span>
+                    <span class="tag">Netherite Sword</span>
+                    <span class="tag">Vòng Phù Phép</span>
+                </div>
+            </div>
+
+            <div class="slide-item">
+                <div class="slide-icon">🌻</div>
+                <h3>Nông Trại Pixel & Thương Nhân</h3>
+                <p>Trồng trọt thời gian thực, tưới nước bón phân và đón thương nhân dạo ghé thăm mua bán nông sản.</p>
+                <div class="slide-tags">
+                    <span class="tag">!vuon</span>
+                    <span class="tag">!trong</span>
+                    <span class="tag">!thuongnhan</span>
+                </div>
+            </div>
+
+            <!-- Slider Dots -->
+            <div class="slider-dots" id="sliderDots">
+                <span class="dot active" onclick="currentSlide(0)"></span>
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+                <span class="dot" onclick="currentSlide(4)"></span>
+            </div>
         </div>
+    </section>
+
+    <!-- Background Customizer Drawer -->
+    <div class="bg-drawer">
+        <h4>🖼️ Đổi Ảnh Nền Website</h4>
+        <input type="text" id="bgUrlInput" placeholder="Dán link ảnh (URL)...">
+        <div class="bg-btn-grid" style="margin-bottom: 8px;">
+            <button class="btn btn-primary" onclick="applyCustomBg()">Áp dụng</button>
+            <button class="btn btn-outline" onclick="triggerFileInput()">Tải ảnh lên</button>
+        </div>
+        <div class="bg-btn-grid">
+            <button class="btn btn-outline" onclick="resetBg()" style="grid-column: span 2;">Khôi phục mặc định</button>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
     </div>
 
-    <!-- JAVASCRIPT SLIDER & LOGIC -->
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 <b>TITAN SHARK V2</b> — Oceanic Discord Bot System.</p>
+        <p style="margin-top: 6px; font-size: 0.85rem;">Phát triển và vận hành bởi <b>tomnz x Cá Xấu MC</b></p>
+    </footer>
+
     <script>
-        // Feature Slides Data
-        const slidesData = [
-            {
-                title: "Titan Shark V2 ",
-                subtitle: "Made by tomnz x Cá Xấu MC",
-                img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"
-            },
-            {
-                title: "Titan AI Assistant",
-                subtitle: "Smart Chat & Vietcode",
-                img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80"
-            },
-            {
-                title: "Titan Sea Fishing v2",
-                subtitle: "100+ Fishes & Weather Events",
-                img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80"
-            },
-            {
-                title: "Battle Cats Realtime",
-                subtitle: "Gacha & 10 Battle Stages",
-                img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80"
-            },
-            {
-                title: "Minecraft game & Garden",
-                subtitle: "Netherite Swords & Pixel Crops",
-                img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80"
-            },
-            {
-                title: "Auto Moderation Guard",
-                subtitle: "Badword Filter & Welcome Card",
-                img: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80"
-            }
-        ];
+        // Auto Slider Logic
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.slide-item');
+        const dots = document.querySelectorAll('.dot');
+        let slideInterval = setInterval(nextSlide, 4000);
 
-        let currentSlide = 0;
-        const totalSlides = slidesData.length;
-        let slideInterval;
-
-        // Initialize Dots
-        function initDots() {
-            const container = document.getElementById('dotsContainer');
-            container.innerHTML = '';
-            for (let i = 0; i < totalSlides; i++) {
-                const dot = document.createElement('button');
-                dot.className = `w-2 h-2 rounded-full transition-all duration-300 ${i === 0 ? 'bg-cyan-400 scale-125' : 'bg-white/20 hover:bg-white/50'}`;
-                dot.onclick = () => goToSlide(i);
-                container.appendChild(dot);
-            }
-        }
-
-        // Go To Specific Slide
-        function goToSlide(index) {
-            currentSlide = index;
+        function showSlide(n) {
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
             
-            // Update Text Slides
-            const slides = document.querySelectorAll('.slide-content');
-            slides.forEach((slide, i) => {
-                if (i === index) {
-                    slide.classList.add('active');
-                } else {
-                    slide.classList.remove('active');
-                }
-            });
-
-            // Update Slide Index Text (01 / 06)
-            document.getElementById('slideIndexText').innerText = `0${index + 1} / 0${totalSlides}`;
-
-            // Update Dots
-            const dots = document.getElementById('dotsContainer').children;
-            Array.from(dots).forEach((dot, i) => {
-                if (i === index) {
-                    dot.className = 'w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-500/50 transition-all duration-300';
-                } else {
-                    dot.className = 'w-2 h-2 rounded-full bg-white/20 hover:bg-white/50 transition-all duration-300';
-                }
-            });
-
-            // Update Right Widget Preview
-            document.getElementById('previewWidgetImg').src = slidesData[index].img;
-            document.getElementById('previewWidgetTitle').innerText = slidesData[index].title;
-            document.getElementById('previewWidgetSub').innerText = slidesData[index].subtitle;
-
-            // Reset Timer
-            resetAutoSlide();
+            slideIndex = (n + slides.length) % slides.length;
+            slides[slideIndex].classList.add('active');
+            dots[slideIndex].classList.add('active');
         }
 
         function nextSlide() {
-            let nextIndex = (currentSlide + 1) % totalSlides;
-            goToSlide(nextIndex);
+            showSlide(slideIndex + 1);
         }
 
-        function resetAutoSlide() {
+        function currentSlide(n) {
+            showSlide(n);
             clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, 4000);
+            slideInterval = setInterval(nextSlide, 4000); // Reset timer
         }
 
-        // BACKGROUND CUSTOMIZER LOGIC
+        // Background Customizer Logic
         const DEFAULT_BG = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80';
 
-        function toggleBgModal() {
-            const modal = document.getElementById('bgModal');
-            if (modal.classList.contains('opacity-0')) {
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-            } else {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-            }
-        }
-
-        function setBgImage(url) {
-            document.getElementById('bgContainer').style.backgroundImage = `url('${url}')`;
-        }
-
-        function applyBgUrl() {
+        function applyCustomBg() {
             const url = document.getElementById('bgUrlInput').value.trim();
             if (url) {
-                setBgImage(url);
-                toggleBgModal();
+                document.body.style.backgroundImage = `var(--bg-overlay), url('${url}')`;
             } else {
-                alert('Vui lòng nhập đường link ảnh hợp lệ!');
+                alert('Vui lòng nhập link ảnh hợp lệ!');
             }
         }
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
+        function resetBg() {
+            document.body.style.backgroundImage = `var(--bg-overlay), url('${DEFAULT_BG}')`;
+            document.getElementById('bgUrlInput').value = '';
+        }
+
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    setBgImage(e.target.result);
-                    toggleBgModal();
+                reader.onload = function(event) {
+                    document.body.style.backgroundImage = `var(--bg-overlay), url('${event.target.result}')`;
                 };
                 reader.readAsDataURL(file);
             }
         }
-
-        function resetDefaultBg() {
-            setBgImage(DEFAULT_BG);
-            document.getElementById('bgUrlInput').value = '';
-            toggleBgModal();
-        }
-
-        // On Page Load
-        window.onload = function() {
-            initDots();
-            resetAutoSlide();
-        }
     </script>
 </body>
-</html>unity",
-    "DISCORD BOT • OCEAN SYSTEM": "A LITTLE OCEAN, INSIDE YOUR SERVER",
-    "Một chú cá mập, cả một đại dương tính năng. Quản lý server, câu cá, kinh tế, level, minigame và nhiều tiện ích trong một bot.":
-        "Một hệ sinh thái đại dương dành cho cộng đồng của bạn. Từ quản trị server đến câu cá, kinh tế, cấp độ và những tiện ích mỗi ngày.",
-    "⚡ Mời TINTAN SHARK": "Thêm bot vào server ↗",
-    "💬 Server Support": "Ghé không gian hỗ trợ ↗",
-    "✦ Ready to dive": "✦ Made for Tom Nz X Cá Xấu Mc ",
-    "Một đại dương tính năng 🌊": "Những mảnh ghép của cộng đồng",
-    "Quản lý server, kinh tế, game và tiện ích được gom vào một chú cá mập.":
-        "Công cụ quản trị và hoạt động cộng đồng, được sắp xếp gọn gàng trong một nơi.",
-    "Quản lý mạnh.<br>Giải trí chất.": "Cộng đồng vận hành.<br>Đại dương sống động.",
-    "Cho server của bạn<br>một chú cá mập mới 🦈": "Mở lối vào<br>đại dương TINTAN SHARK",
-    "READY TO DIVE?": "YOUR COMMUNITY, IN ITS ELEMENT",
-}
-for a, b in replacements.items():
-    html = html.replace(a, b)
-
-# Append a complete visual re-skin: calm editorial ocean lab, pearlescent paper,
-# deep ink typography, and layered orbital rings (not a gaming/neon look).
-skin = r"""
-/* ===== WEB V2: TIDAL ATELIER / editorial ocean aesthetic ===== */
-:root{
-  --paper:#f4f3ec; --ink:#142d35; --muted:#647a7b;
-  --sea:#176e70; --mint:#b9d8c9; --line:rgba(20,45,53,.15);
-}
-body{
-  color:var(--ink)!important;
-  background:
-    radial-gradient(ellipse at 82% 10%,rgba(190,220,208,.72),transparent 30%),
-    radial-gradient(ellipse at 8% 48%,rgba(219,230,215,.68),transparent 28%),
-    linear-gradient(180deg,#f7f6f0 0%,#eeefe7 58%,#f7f6f0 100%)!important;
-  font-family:Inter,Arial,sans-serif;
-}
-body:before{
-  opacity:.32!important;
-  background-image:linear-gradient(rgba(20,45,53,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(20,45,53,.035) 1px,transparent 1px)!important;
-  background-size:42px 42px!important;
-}
-body:after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:8;
-  background:radial-gradient(circle 150px at var(--mx,50%) var(--my,50%),
-    transparent 58%,rgba(23,110,112,.12) 59%,transparent 60%,
-    transparent 70%,rgba(23,110,112,.07) 71%,transparent 72%);
-  transition:background .12s linear;
-}
-nav{max-width:1240px!important;height:88px!important}
-.brand{font-size:17px!important;letter-spacing:.04em}
-.logo{
-  border-radius:50%!important;width:43px!important;height:43px!important;
-  background:#d4e6da!important;box-shadow:none!important;color:#164b4c;
-  border:1px solid rgba(23,110,112,.2);
-}
-.brand b{color:var(--sea)!important}
-.links{color:#637777!important}
-.links a:hover{color:var(--sea)!important}
-.support-nav{
-  border:1px solid var(--line)!important;border-radius:999px!important;
-  background:rgba(255,255,255,.45)!important;color:var(--ink)!important;
-}
-.hero{max-width:1240px!important;min-height:680px!important;padding-top:55px!important}
-.eyebrow{color:var(--sea)!important;letter-spacing:2.5px!important;font-size:10px!important}
-.pulse{background:#4d9b82!important;box-shadow:0 0 0 5px rgba(77,155,130,.13)!important}
-h1{font-family:Georgia,'Times New Roman',serif!important;font-weight:500!important;
-  letter-spacing:-.065em!important;line-height:.88!important;font-size:clamp(66px,9vw,116px)!important}
-h1 span{color:var(--sea)!important;text-shadow:none!important;font-style:italic}
-.hero-text{color:var(--muted)!important;line-height:1.9!important;max-width:520px!important}
-.btn{border-radius:999px!important;padding:15px 22px!important;font-size:13px!important}
-.btn:hover{transform:translateY(-2px)!important}
-.primary{background:var(--ink)!important;color:#f7f6f0!important;box-shadow:0 12px 28px rgba(20,45,53,.12)!important}
-.secondary{background:transparent!important;border:1px solid var(--line)!important;color:var(--ink)!important}
-.trust{color:#82908b!important}.trust code{color:var(--sea)!important}
-.hero-art{height:530px!important}
-.orb{
-  width:330px!important;height:330px!important;
-  background:radial-gradient(circle at 42% 36%,rgba(255,255,255,.95),rgba(185,216,201,.58) 44%,rgba(23,110,112,.08) 70%,transparent 72%)!important;
-  box-shadow:0 0 0 1px rgba(23,110,112,.09),0 30px 90px rgba(45,91,79,.12)!important;
-}
-.ring{border-color:rgba(23,110,112,.26)!important}
-.ring1{width:430px!important;height:430px!important;border-width:1px!important;animation:spin 26s linear infinite!important}
-.ring2{width:505px!important;height:505px!important;border-style:solid!important;border-color:rgba(23,110,112,.13)!important;animation:spin 44s linear infinite reverse!important}
-.orb:before,.orb:after{
-  content:"";position:absolute;border:1px solid rgba(23,110,112,.18);border-radius:50%;
-  width:560px;height:190px;transform:rotate(-32deg);animation:orbitTilt 22s linear infinite;
-}
-.orb:after{width:570px;height:240px;transform:rotate(52deg);animation-duration:31s;animation-direction:reverse}
-@keyframes orbitTilt{to{transform:rotate(328deg)}}
-.shark{font-size:130px!important;filter:grayscale(.12) drop-shadow(0 18px 20px rgba(20,45,53,.15))!important;animation:swim 5s ease-in-out infinite!important}
-.mini-bubble{color:#4e9383!important}
-.float-card{
-  border:1px solid rgba(20,45,53,.11)!important;border-radius:18px!important;
-  background:rgba(250,250,245,.82)!important;backdrop-filter:blur(18px)!important;
-  box-shadow:0 18px 50px rgba(25,57,53,.08)!important;color:var(--ink)!important;
-}
-.float-card small{color:#718783!important}
-.stats{
-  border:1px solid var(--line)!important;border-radius:24px!important;
-  background:rgba(255,255,255,.38)!important;backdrop-filter:blur(12px)!important;
-}
-.stats div{border-color:var(--line)!important}
-.stats strong{font:500 34px Georgia,serif!important;color:var(--sea)!important}
-.stats span{color:#718783!important}
-.section-head h2,.showcase h2,.cta h2{
-  font-family:Georgia,'Times New Roman',serif!important;font-weight:500!important;
-  letter-spacing:-.045em!important;color:var(--ink)!important;
-}
-.section-head p{color:var(--muted)!important}
-.card{
-  border:1px solid var(--line)!important;border-radius:23px!important;
-  background:rgba(255,255,255,.46)!important;box-shadow:0 8px 30px rgba(20,45,53,.025)!important;
-}
-.card:before{background:rgba(185,216,201,.35)!important}
-.card:hover{transform:translateY(-5px)!important;border-color:rgba(23,110,112,.35)!important;box-shadow:0 18px 40px rgba(20,45,53,.08)!important}
-.card h3{color:var(--ink)!important;font-weight:650!important}
-.card p{color:var(--muted)!important}
-.tags span{background:#e2eee5!important;color:#47766c!important;border-radius:999px!important}
-.showcase{
-  border:1px solid var(--line)!important;border-radius:34px!important;
-  background:linear-gradient(125deg,rgba(221,235,224,.8),rgba(250,249,243,.82))!important;
-}
-.showcase-glow{background:rgba(117,177,150,.2)!important}
-.showcase-copy p{color:var(--muted)!important}
-.text-link{color:var(--sea)!important}
-.console{border:1px solid rgba(20,45,53,.16)!important;background:#18363a!important;box-shadow:0 25px 70px rgba(20,45,53,.17)!important}
-.console-top{border-color:rgba(255,255,255,.1)!important}
-.console-top span{background:#8ab6a1!important}
-.console-top b{color:#bdd6ca!important}
-.console-body{color:#e2eee5!important}
-.muted{color:#a4c4b8!important}.cyan-text{color:#a9d8bf!important}.cursor{color:#d2e8d8!important}
-.command{border:1px solid var(--line)!important;border-radius:14px!important;background:rgba(255,255,255,.42)!important}
-.command code{color:var(--sea)!important}.command span{color:#718783!important}
-.cta{
-  border:1px solid rgba(23,110,112,.16)!important;border-radius:34px!important;
-  background:radial-gradient(circle at 50% 0%,rgba(185,216,201,.72),rgba(247,246,240,.92) 68%)!important;
-}
-.cta p{color:var(--muted)!important}.cta-bubbles{color:rgba(23,110,112,.18)!important}
-footer{border-color:var(--line)!important;color:#718783!important}
-footer .footer-brand{font-family:Georgia,serif!important;color:var(--ink)!important}
-footer b,footer a{color:var(--sea)!important}
-.bubble{border-color:rgba(23,110,112,.23)!important;box-shadow:inset 0 0 15px rgba(23,110,112,.05)!important}
-@media(max-width:850px){
-  .hero{padding-top:38px!important}
-  .hero-art{height:450px!important}
-  .orb{width:280px!important;height:280px!important}
-  .ring1{width:350px!important;height:350px!important}
-  .ring2{width:410px!important;height:410px!important}
-  .orb:before,.orb:after{width:430px;height:150px}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
-}
-"""
-html = html.replace("</style>", skin + "\n</style>", 1)
-# Add pointer position tracking for the subtle concentric cursor halo.
-html = html.replace("</script>", """
-document.addEventListener("mousemove", e => {
-  document.documentElement.style.setProperty("--mx", e.clientX + "px");
-  document.documentElement.style.setProperty("--my", e.clientY + "px");
-});
-</script>""", 1)
-
-out = Path("/mnt/data/titan_shark_web_v2.html")
-out.write_text(html, encoding="utf-8")
-print(f"Đã tạo giao diện V2: {out.name} ({out.stat().st_size:,} bytes)")
+</html>
